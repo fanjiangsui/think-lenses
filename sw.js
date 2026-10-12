@@ -1,6 +1,6 @@
 // 思考鏡頭 service worker:離線可用,採 stale-while-revalidate。
 // 新增或刪除檔案時,請更新 ASSETS 並調高 CACHE 版本號。
-const CACHE = 'think-lenses-v0.2.0';
+const CACHE = 'think-lenses-v0.3.0';
 const ASSETS = [
   './', './index.html', './style.css', './app.js', './manifest.webmanifest',
   './data/philosophers.json',

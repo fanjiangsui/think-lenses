@@ -99,6 +99,37 @@ for e in entries:
     if e.get('type') is not None and not e.get('lenses'): err(f'entry {k}: 有 type 的入口需要至少一面鏡頭')
     if len(str(e.get('label', ''))) > 16 and e.get('primary'): warn(f'entry {k}: primary 的 label 偏長(手機上可能換行)')
 
+
+# ---- 首頁、入口與聊聊(v0.4)----
+for k in ('tagline', 'tagline_sub'):
+    if not str(meta.get(k, '')).strip(): err(f'meta.{k} 不可空白(首頁用)')
+modes = d.get('modes', [])
+if len(modes) < 1: err('modes 不可空白')
+mids = [m.get('id') for m in modes]
+if len(set(mids)) != len(mids): err('modes 有重複的 id')
+for m in modes:
+    k = m.get('id')
+    for f in ('label', 'desc', 'effort', 'route'):
+        if not str(m.get(f, '')).strip(): err(f'mode {k}: 缺少 {f}')
+    if not str(m.get('route', '')).startswith('#/'): err(f'mode {k}: route 必須以 #/ 開頭')
+    if m.get('lens') not in by_id: err(f'mode {k}: lens 不存在')
+    if len(str(m.get('desc', ''))) > 22: warn(f'mode {k}: desc 偏長(手機上會換行)')
+
+chats = d.get('chats', [])
+cids = [c.get('id') for c in chats]
+if len(set(cids)) != len(cids): err('chats 有重複的 id')
+if len(chats) < 8: err(f'chats 至少需要 8 則，目前 {len(chats)}')
+for c in chats:
+    k = c.get('id')
+    for f in ('title', 'story', 'ask', 'source'):
+        if not str(c.get(f, '')).strip(): err(f'chat {k}: 缺少 {f}')
+    if len(str(c.get('story', ''))) > 140: warn(f'chat {k}: story 偏長(聊聊應該一眼讀完)')
+    lid = c.get('lens')
+    if lid not in by_id: err(f'chat {k}: lens 不存在')
+    elif by_id[lid].get('quick_ok') is not True: err(f'chat {k}: 鏡頭 {lid} 不是 quick_ok，不可用在聊聊')
+for l in quick:
+    if not any(c.get('lens') == l.get('id') for c in chats): err(f'quick_ok 的鏡頭 {l.get("id")} 沒有任何聊聊故事')
+
 # 用字：中文旁邊不應出現半形標點(台灣用法用全形)
 CJK = '\u4e00-\u9fff\u3000-\u303f'
 bad = re.compile(rf'[{CJK}][,:;?!()]|[,:;?!(](?=[{CJK}])')

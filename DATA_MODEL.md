@@ -172,3 +172,31 @@ v1 沒有做 AI(B 層的 `overlay.json`、`ai_config.json` 留待 v2)，只實�
 ### 刪除
 
 刪除以墓碑表示：`{ id, created_at, updated_at, deleted_at }`，內容立即清空。復原會寫回完整內容，並把 `updated_at` 設為比墓碑更新的時間，才能蓋過已同步到另一台的刪除。
+
+## v3：首頁與五個入口
+
+### 內容包 `philosophers.json`(v0.4.0)新增
+
+| 欄位 | 說明 |
+|---|---|
+| `meta.tagline`、`meta.tagline_sub` | 首頁的一句話說明與定位 |
+| `modes[]` | 首頁五個入口：`id`、`label`、`desc`、`effort`(要花多少力氣)、`route`、`lens`(只用來決定該入口圓圈的顏色) |
+| `chats[]` | 「聊聊而已」的短故事：`id`、`lens`(必須是 `quick_ok`)、`title`、`story`、`ask`、`source`。內容是改寫，不是原文 |
+
+### 紀錄(sessions)
+
+| `mode` | 入口 | 欄位 |
+|---|---|---|
+| `deep`(或舊紀錄沒有此欄) | 找方向 | 與 v1 相同 |
+| `quick` | 解鎖人生 | `entry`、`reactions[]`、`action` |
+| `storm` | 腦內風暴 | `problem`(那個念頭)、`note`(便條紙)、`cards[]`：`{ lens, question_index }`、`lenses_used` |
+
+「聊聊而已」**沒有任何紀錄**，不寫入 sessions，也不寫入 meta。
+
+### 本機設定
+
+`tl.meta.v1` 新增 `seen`：`{ <鏡頭 id>: <最後讀過的日期> }`，供「補充觀點」顯示「你的角度」累積。這是裝置本機設定，**不會**放進備份檔。
+
+### 今日一顆
+
+把「`quick_ok` 的鏡頭 × 其 `quick_questions`」輪流排列(同一面鏡頭不會連續出現)，以日期(以當地日期計)對池子大小取餘數，每天固定一顆。池子目前約 19 顆，約 19 天輪完一輪。

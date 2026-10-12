@@ -102,11 +102,27 @@ def run(base, shots, headed, tmp):
 
         # ---------- 首頁與開始思考 ----------
         page.goto(base)
-        page.wait_for_selector('.row.big')
-        check('首頁列出所有輕量入口', page.locator('.row.big').count() == len(pack['entries']), f'{page.locator(".row.big").count()} vs {len(pack["entries"])}')
+        page.wait_for_selector('.entry')
+        home_text = page.locator('#app').inner_text()
+        check('首頁顯示 app 名稱、一句話說明與定位', '思考鏡頭' in home_text and pack['meta']['tagline'] in home_text and pack['meta']['tagline_sub'] in home_text)
+        check('首頁不再以「你是哪一種」的診斷問題開頭', '現在比較像哪一種' not in home_text)
+        check('首頁的五個入口名稱與順序和內容包一致', page.locator('.entry .t').all_inner_texts() == [m['label'] for m in pack['modes']])
+        check('首頁的入口連結正確', [a.get_attribute('href') for a in page.locator('a.entry').all()] == [m['route'] for m in pack['modes']])
+        check('每個入口都標示要花多少力氣', page.locator('.entry .eff').count() == len(pack['modes']))
+        check('首頁有「今日一顆」，且連到完整頁', page.locator('.today').is_visible() and '今日一顆' in page.locator('.today').inner_text() and page.locator('.today a[href="#/dose"]').count() == 1)
         check('首頁零輸入(沒有任何輸入欄)', page.locator('#app textarea, #app input').count() == 0)
         check('首頁沒有橫向捲動(手機寬度)', no_hscroll(page))
+        check('全新使用者的首頁沒有任何提示框', page.locator('.notice').count() == 0)
+        home_today_q = page.locator('.todayq').inner_text()
         snap(page, '01_home')
+
+        page.click('a.entry[href="#/unlock"]')
+        page.wait_for_selector('.row.big')
+        check('解鎖人生頁列出所有狀況入口', page.locator('.row.big').count() == len(pack['entries']))
+        check('解鎖人生頁零輸入', page.locator('#app textarea, #app input').count() == 0)
+        page.click('a.row.big[href="#/q/decision"]')
+        page.wait_for_selector('.bigq')
+        check('輕量流程的「重選」回到解鎖人生頁', page.locator('.crumb a').first.get_attribute('href') == '#/unlock')
 
         page.goto(base + '#/deep')
         page.wait_for_selector('.rows .row')
@@ -157,11 +173,12 @@ def run(base, shots, headed, tmp):
 
         # ---------- 紀錄、鏡頭庫、關於 ----------
         page.click('nav a[href="#/history"]')
+        page.wait_for_selector('h1:has-text("紀錄")')
         page.wait_for_selector('.rows .row')
         check('紀錄列表有 1 則', page.locator('.rows .row').count() == 1)
         snap(page, '04_history')
         page.click('nav a[href="#/library"]')
-        page.wait_for_selector('.rows .row')
+        page.wait_for_selector('.rows .row[href^="#/lens/"]')
         check('鏡頭庫列出所有鏡頭', page.locator('.rows .row[href^="#/lens/"]').count() == n_lenses)
         check('鏡頭庫沒有橫向捲動', no_hscroll(page))
         for l in pack['lenses']:
@@ -278,7 +295,7 @@ def run(base, shots, headed, tmp):
         (tmp / 'due.json').write_text(json.dumps(due), encoding='utf-8')
         import_file(p2, tmp / 'due.json')
         p2.goto(base + '#/')
-        p2.wait_for_selector('.row.big')
+        p2.wait_for_selector('.entry')
         check('首頁顯示深入思考到期回顧的提示', '到了回顧時間' in p2.locator('.notice').inner_text())
         p2.goto(base + '#/deep')
         p2.wait_for_selector('.notice h3')
@@ -290,7 +307,7 @@ def run(base, shots, headed, tmp):
         p2.fill('#review_note', '條件變了一半')
         p2.wait_for_timeout(600)
         p2.goto(base + '#/')
-        p2.wait_for_selector('.row.big')
+        p2.wait_for_selector('.entry')
         check('填寫回顧後，到期提示消失', p2.locator('.notice').count() == 0)
 
         # ---------- 輕量模式 ----------
@@ -379,7 +396,7 @@ def run(base, shots, headed, tmp):
         qid = qs0['id']
 
         page.goto(base + '#/')
-        page.wait_for_selector('.row.big')
+        page.wait_for_selector('.entry')
         check('小行動當天不會被回訪', page.locator('.notice').count() == 0)
 
         # 隔天打開：回訪一次
@@ -397,7 +414,7 @@ def run(base, shots, headed, tmp):
         check('回訪時導覽列有提示點', page.locator('nav .pip').count() == 1)
         snap(page, '09_followup')
         page.click('[data-act=fu][data-s=done]')
-        page.wait_for_selector('.row.big')
+        page.wait_for_selector('.entry')
         raw = json.loads(page.evaluate("localStorage.getItem('tl.sessions.v1')"))
         check('回訪後狀態更新為「做了」並消除提示', [x for x in raw if x.get('id') == qid][0]['action']['status'] == 'done' and page.locator('.notice').count() == 0)
 
@@ -410,6 +427,7 @@ def run(base, shots, headed, tmp):
         raw = json.loads(page.evaluate("localStorage.getItem('tl.sessions.v1')"))
         check('可在紀錄頁修改小行動狀態', [x for x in raw if x.get('id') == qid][0]['action']['status'] == 'not_fit')
         page.goto(base + '#/history')
+        page.wait_for_selector('h1:has-text("紀錄")')
         page.wait_for_selector('.rows .row')
         check('紀錄列表顯示輕量紀錄與狀態', '不適合' in page.locator('.rows .row').first.inner_text())
 
@@ -422,6 +440,134 @@ def run(base, shots, headed, tmp):
         page.goto(base + '#/help')
         page.wait_for_selector('h1')
         check('求助頁含安心專線', '1925' in page.locator('#app').inner_text())
+
+        # ---------- 腦內風暴 ----------
+        quick_ok2 = {l['id'] for l in pack['lenses'] if l.get('quick_ok')}
+        allowed2 = {l['id']: {l['questions'][i] for i in l.get('quick_questions', range(len(l['questions'])))} for l in pack['lenses']}
+
+        def sessions_of(pg, mode):
+            raw = pg.evaluate("localStorage.getItem('tl.sessions.v1')")
+            return [x for x in json.loads(raw or '[]') if x.get('mode') == mode and not x.get('deleted_at')]
+
+        page.goto(base + '#/storm')
+        page.wait_for_selector('#thought')
+        storm_before = len(sessions_of(page, 'storm'))
+        check('腦內風暴：還沒翻之前沒有便條紙', page.locator('#stormNote').count() == 0)
+        page.click('[data-act=storm-flip]')
+        page.wait_for_selector('.stormcard')
+        lens_ids = [c.get_attribute('data-lens') for c in page.locator('.stormcard').all()]
+        check('腦內風暴：沒有念頭也能翻出 4 個角度', len(lens_ids) == 4)
+        check('腦內風暴：4 個角度各不相同', len(set(lens_ids)) == 4)
+        check('腦內風暴：只用適合低落時的鏡頭', set(lens_ids) <= quick_ok2, str(lens_ids))
+        pairs2 = {frozenset((p['a'], p['b'])) for p in pack['collision_pairs'] if p['a'] in quick_ok2 and p['b'] in quick_ok2}
+        check('腦內風暴：其中包含一組立場對撞的鏡頭', (not pairs2) or any(frozenset((a, b)) in pairs2 for a in lens_ids for b in lens_ids if a < b))
+        bad = [(c.get_attribute('data-lens'), c.locator('.stormq').inner_text()) for c in page.locator('.stormcard').all() if c.locator('.stormq').inner_text() not in allowed2[c.get_attribute('data-lens')]]
+        check('腦內風暴：只出現溫和的問題', not bad, str(bad[:2]))
+        check('腦內風暴：沒有輸入時不建立紀錄', len(sessions_of(page, 'storm')) == storm_before)
+        check('腦內風暴沒有橫向捲動', no_hscroll(page))
+        snap(page, '11_storm')
+        page.fill('#thought', '要不要換工作')
+        page.fill('#stormNote', '便條：先列出三個擔心')
+        page.wait_for_timeout(700)
+        st = sessions_of(page, 'storm')
+        check('腦內風暴：念頭、便條與 4 張卡即時存下', len(st) == storm_before + 1 and st[-1]['problem'] == '要不要換工作' and '三個擔心' in st[-1]['note'] and len(st[-1]['cards']) == 4)
+        sid_storm = st[-1]['id']
+        first_lens = page.locator('.stormcard').first.get_attribute('data-lens')
+        page.locator('[data-act=storm-swap]').first.click()
+        page.wait_for_function("(l) => document.querySelector('.stormcard').dataset.lens !== l", arg=first_lens)
+        lens_after = [c.get_attribute('data-lens') for c in page.locator('.stormcard').all()]
+        check('「換一個」換成不重複的鏡頭並存下', len(set(lens_after)) == 4 and [c['lens'] for c in sessions_of(page, 'storm')[-1]['cards']] == lens_after)
+        page.click('text=再翻一組')
+        page.wait_for_selector('.stormcard')
+        check('「再翻一組」保留念頭與便條', page.input_value('#thought') == '要不要換工作' and '三個擔心' in page.input_value('#stormNote'))
+        page.goto(base + '#/history')
+        page.wait_for_selector('h1:has-text("紀錄")')
+        page.wait_for_selector('.rows .row')
+        check('紀錄列表標示「腦內風暴」', '腦內風暴' in page.locator('.rows .row').first.inner_text())
+        page.locator('.rows .row').first.click()
+        page.wait_for_selector('#stormNote')
+        check('從紀錄回到腦內風暴頁，便條仍在', '#/storm/' in page.url and '三個擔心' in page.input_value('#stormNote'))
+        path5 = export_file(page, 'export5.json')
+        import_file(p2, path5)
+        got = p2.evaluate("(id) => { const s = JSON.parse(localStorage.getItem('tl.sessions.v1')).find(x => x.id === id); return s && [s.mode, s.note, s.cards.length]; }", sid_storm)
+        check('腦內風暴紀錄可匯入另一台', got and got[0] == 'storm' and '三個擔心' in got[1] and got[2] == 4, str(got))
+        page.goto(base + f'#/storm/{sid_storm}')
+        page.wait_for_selector('#stormNote')
+        page.once('dialog', lambda d: d.accept())
+        msg = toast_after(page, lambda: page.click('[data-act=delete]'))
+        check('腦內風暴紀錄可刪除並復原', '已刪除 1 則' in msg and page.locator('#toast .toast-btn').count() == 1, msg)
+        page.click('#toast .toast-btn')
+        page.wait_for_function("document.querySelectorAll('.rows .row').length >= 1")
+        check('復原後腦內風暴紀錄回來', len(sessions_of(page, 'storm')) == storm_before + 1)
+
+        # ---------- 轉換心境，聊聊而已：不寫入任何紀錄 ----------
+        snapshot = "JSON.stringify(Object.entries(localStorage).sort())"
+        before = page.evaluate(snapshot)
+        page.goto(base + '#/chat')
+        page.wait_for_selector('.story')
+        check('聊聊：沒有任何輸入欄', page.locator('#app textarea, #app input').count() == 0)
+        check('聊聊：沒有橫向捲動', no_hscroll(page))
+        snap(page, '12_chat')
+        titles, chat_lenses = [], []
+        for _ in range(30):
+            if page.locator('.story').count() == 0:
+                break
+            titles.append(page.locator('.angle').inner_text())
+            chat_lenses.append(page.locator('.angle').get_attribute('data-lens'))
+            page.click('[data-act=chat-next]')
+        n_stories = len([c for c in pack['chats'] if c['lens'] in quick_ok2])
+        check('聊聊：每則故事只出現一次', len(titles) == n_stories and len(set(titles)) == len(titles), f'{len(titles)} vs {n_stories}')
+        check('聊聊：故事只來自適合低落時的鏡頭', set(chat_lenses) <= quick_ok2)
+        check('聊聊：聽完會說明沒有留下任何紀錄', '沒有留下任何紀錄' in page.locator('#app').inner_text())
+        page.click('[data-act=chat-restart]')
+        page.wait_for_selector('.story')
+        page.click('[data-act=chat-stop]')
+        check('聊聊：可以隨時說「夠了」', '夠了' in page.locator('h1').inner_text())
+        check('聊聊：整個過程沒有寫入任何儲存空間', page.evaluate(snapshot) == before)
+
+        # ---------- 補充觀點：每天一顆 ----------
+        page.goto(base + '#/dose')
+        page.wait_for_selector('.dose')
+        check('補充觀點：沒有任何輸入欄', page.locator('#app textarea, #app input').count() == 0)
+        check('補充觀點的今日一顆與首頁一致', page.locator('.dose .askq').inner_text() == home_today_q, f'{page.locator(".dose .askq").inner_text()} vs {home_today_q}')
+        check('補充觀點：附有這個角度的限制', page.locator('.dose summary').inner_text() == '這個角度的限制')
+        total = page.locator('.shelf .r').count()
+        check('補充觀點：顯示「你的角度」累積', total == len(quick_ok2) and page.locator('.shelf .r.seen').count() == 1)
+        prev_q = page.locator('.dose .askq').inner_text()
+        page.click('[data-act=dose-more]')
+        check('「再來一顆」會換一顆', page.locator('.dose .askq').inner_text() != prev_q)
+        for _ in range(80):
+            if page.locator('.shelf .r.seen').count() == total:
+                break
+            page.click('[data-act=dose-more]')
+        check('多讀幾顆後，角度累積到全部', page.locator('.shelf .r.seen').count() == total)
+        meta_seen = json.loads(page.evaluate("localStorage.getItem('tl.meta.v1')")).get('seen', {})
+        check('讀過的角度有存在本機', len(meta_seen) == total)
+        check('補充觀點沒有橫向捲動', no_hscroll(page))
+        snap(page, '13_dose')
+
+        clk = b.new_context(viewport={'width': 390, 'height': 844}, locale='zh-TW')
+        cp = clk.new_page()
+        hook(cp)
+
+        def today_q(when):
+            cp.clock.set_fixed_time(when)
+            cp.goto(base)
+            cp.wait_for_selector('.today')
+            return cp.locator('.todayq').inner_text()
+
+        qa = today_q('2026-03-01T12:00:00')
+        qb = today_q('2026-03-02T12:00:00')
+        qa2 = today_q('2026-03-01T22:30:00')
+        check('今日一顆：每天不同，同一天固定', qa != qb and qa == qa2, f'{qa} | {qb} | {qa2}')
+        pool_q = {l['questions'][i] for l in pack['lenses'] if l.get('quick_ok') for i in l.get('quick_questions', range(len(l['questions'])))}
+        month = [today_q(f'2026-04-{d:02d}T12:00:00') for d in range(1, 26)]
+        check('今日一顆：連續 25 天都只來自適合低落時的問題，且輪完整個池', set(month) == pool_q, f'{len(set(month))} vs {len(pool_q)}')
+        page.goto(base + '#/history')
+        page.wait_for_selector('h1:has-text("紀錄")')
+        page.wait_for_selector('.rows .row')
+        hist = page.locator('.rows').inner_text()
+        check('紀錄列表同時標示各種模式', '腦內風暴' in hist and '解鎖人生' in hist)
 
         # ---------- 資料保護：刪除、加密備份、App 鎖、背景遮蔽 ----------
         ctx3 = b.new_context(viewport={'width': 390, 'height': 844}, locale='zh-TW', accept_downloads=True)
@@ -437,7 +583,7 @@ def run(base, shots, headed, tmp):
                     'conclusion': {'judgment': 'J-' + problem, 'next_step': '', 'confidence': 3}, 'review_at': None, 'review_result': None}
 
         s3.goto(base)
-        s3.wait_for_selector('.row.big')
+        s3.wait_for_selector('.entry')
         s3.evaluate("(v) => localStorage.setItem('tl.sessions.v1', JSON.stringify(v))", [mk(1, 'SECRET-甲'), mk(2, 'SECRET-乙'), mk(3, 'SECRET-丙')])
         s3.goto(base + '#/history')
         s3.reload()
@@ -609,12 +755,12 @@ def run(base, shots, headed, tmp):
         check('PIN 正確(按 Enter)即解鎖', s3.locator('#pin').count() == 0 and s3.locator('#nav a').count() == 4)
 
         s3.goto(base + '#/')
-        s3.wait_for_selector('.row.big')
+        s3.wait_for_selector('.entry')
         s3.click('[data-act=lock-now]')
         s3.wait_for_selector('#pin')
         check('首頁的「鎖定」可立即鎖上', True)
         try_pin('2468')
-        s3.wait_for_selector('.row.big')
+        s3.wait_for_selector('.entry')
 
         set_vis('hidden')
         check('切到背景時遮蔽畫面', s3.evaluate("document.body.classList.contains('cover')"))
