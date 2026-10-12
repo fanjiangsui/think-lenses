@@ -1,16 +1,25 @@
 {
   "meta": {
     "pack": "think-lenses",
-    "version": "0.2.1",
+    "version": "0.3.0",
     "language": "zh-TW",
     "layer": "public",
     "notice": "所有卡片內容皆為編寫者的詮釋與整理，不是哲學家的原話，也不是唯一解讀。引用請回到原典。",
     "design_rules": [
       "只提問，不下結論",
       "每張卡必須有盲點與不適用情況",
-      "不收錄未經核對的引文"
+      "不收錄未經核對的引文",
+      "輕量模式只使用不排斥低落情緒的鏡頭與問題"
     ],
     "changelog": [
+      {
+        "version": "0.3.0",
+        "change": "新增輕量模式所需欄位：angle、micro_action_small、quick_ok、quick_questions，以及 entries（白話入口）"
+      },
+      {
+        "version": "0.2.2",
+        "change": "括號改為全形；新增 tests/ 內容檢查"
+      },
       {
         "version": "0.2.1",
         "change": "內文標點改為全形；失去與無常的提示文字改為使用者語氣"
@@ -60,7 +69,7 @@
       "id": "loss",
       "label": "失去與無常",
       "hint": "離別、失去，或事情回不到從前",
-      "dev_note": "v0.2 覆蓋較薄，待加入伊比鳩魯、塞內卡等"
+      "dev_note": "輕量模式未收；覆蓋較薄，待加入伊比鳩魯、塞內卡，並寫專屬的溫和問題"
     }
   ],
   "lenses": [
@@ -99,8 +108,16 @@
         "sartre"
       ],
       "reading": [
-        "《手冊》(Enchiridion)開頭幾章",
-        "《論說集》(Discourses)"
+        "《手冊》（Enchiridion）開頭幾章",
+        "《論說集》（Discourses）"
+      ],
+      "angle": "先分清楚能決定什麼",
+      "micro_action_small": "只寫下一件「我能決定」的事，不用做。",
+      "quick_ok": true,
+      "quick_questions": [
+        0,
+        1,
+        2
       ]
     },
     {
@@ -110,7 +127,7 @@
       "years": "前 384–前 322",
       "tradition": "德性倫理學（西方）",
       "one_liner": "這個選擇，讓我更像我想成為的人嗎？",
-      "core_claim": "好的人生(eudaimonia)是透過長期培養品格與實踐而來；德性是在「過度」與「不足」之間的適中，而且因人因情境而異。",
+      "core_claim": "好的人生（eudaimonia）是透過長期培養品格與實踐而來；德性是在「過度」與「不足」之間的適中，而且因人因情境而異。",
       "fits": [
         "decision",
         "good_life",
@@ -139,6 +156,14 @@
       ],
       "reading": [
         "《尼各馬可倫理學》第一、二卷"
+      ],
+      "angle": "想成為怎樣的人",
+      "micro_action_small": "想一位你敬佩的人，寫下他的一個做法。",
+      "quick_ok": true,
+      "quick_questions": [
+        0,
+        2,
+        3
       ]
     },
     {
@@ -174,7 +199,14 @@
         "mill"
       ],
       "reading": [
-        "《道德形上學基礎》(Groundwork)"
+        "《道德形上學基礎》（Groundwork）"
+      ],
+      "angle": "如果人人都這樣做",
+      "micro_action_small": "把你的決定寫成一句話：「在……情況下，我會……」。",
+      "quick_ok": true,
+      "quick_questions": [
+        0,
+        2
       ]
     },
     {
@@ -211,7 +243,16 @@
         "kant"
       ],
       "reading": [
-        "《效益主義》(Utilitarianism)"
+        "《效益主義》（Utilitarianism）"
+      ],
+      "angle": "把所有人的影響算進來",
+      "micro_action_small": "列出受這件事影響的人，只寫名字。",
+      "quick_ok": true,
+      "quick_questions": [
+        0,
+        1,
+        2,
+        3
       ]
     },
     {
@@ -252,7 +293,10 @@
         "《快樂的科學》",
         "《查拉圖斯特拉如是說》",
         "《道德的系譜》"
-      ]
+      ],
+      "angle": "這是我要的，還是別人給的",
+      "micro_action_small": "寫下一件你說「應該」、但不確定想要的事。",
+      "quick_ok": false
     },
     {
       "id": "sartre",
@@ -291,7 +335,10 @@
       "reading": [
         "《存在主義是一種人文主義》",
         "《存在與虛無》（進階）"
-      ]
+      ],
+      "angle": "這是我選的嗎",
+      "micro_action_small": "把一句「我必須……」改寫成「我選擇……因為……」。",
+      "quick_ok": false
     },
     {
       "id": "confucius",
@@ -331,6 +378,14 @@
       "reading": [
         "《論語》",
         "《大學》"
+      ],
+      "angle": "我在關係裡的責任",
+      "micro_action_small": "想一位這件事裡的重要他人，寫下他現在可能的感受。",
+      "quick_ok": true,
+      "quick_questions": [
+        0,
+        1,
+        2
       ]
     },
     {
@@ -370,6 +425,15 @@
       ],
       "reading": [
         "《莊子》〈逍遙遊〉〈齊物論〉〈養生主〉"
+      ],
+      "angle": "拉遠看",
+      "micro_action_small": "今天放掉一件不必優化的小事。",
+      "quick_ok": true,
+      "quick_questions": [
+        0,
+        1,
+        2,
+        3
       ]
     },
     {
@@ -412,7 +476,10 @@
         "《薛西弗斯的神話》",
         "《異鄉人》",
         "《鼠疫》"
-      ]
+      ],
+      "angle": "清醒地好好過",
+      "micro_action_small": "用全部的注意力做一件日常小事，一分鐘就好。",
+      "quick_ok": false
     },
     {
       "id": "wang_yangming",
@@ -453,6 +520,13 @@
       "reading": [
         "《傳習錄》",
         "〈大學問〉"
+      ],
+      "angle": "知道卻沒做",
+      "micro_action_small": "把那件「知道該做」的事，拆出最小的第一步，寫下來。",
+      "quick_ok": true,
+      "quick_questions": [
+        0,
+        3
       ]
     }
   ],
@@ -499,5 +573,85 @@
     "波娃",
     "老子",
     "佛家（緣起與無常）"
+  ],
+  "entries": [
+    {
+      "id": "decision",
+      "label": "不知道該選哪個",
+      "type": "decision",
+      "primary": true,
+      "lenses": [
+        "aristotle",
+        "mill",
+        "kant",
+        "wang_yangming",
+        "confucius",
+        "epictetus"
+      ]
+    },
+    {
+      "id": "anxiety",
+      "label": "一直想，停不下來",
+      "type": "anxiety",
+      "primary": true,
+      "lenses": [
+        "epictetus",
+        "zhuangzi"
+      ],
+      "note": "先不用解決它，只是換個角度看看。"
+    },
+    {
+      "id": "meaning",
+      "label": "提不起勁",
+      "type": "meaning",
+      "primary": true,
+      "lenses": [
+        "zhuangzi",
+        "aristotle",
+        "wang_yangming"
+      ],
+      "note": "如果這種感覺已經持續很久，也可以找信任的人或專業的人聊聊。"
+    },
+    {
+      "id": "role",
+      "label": "夾在別人的期待之間",
+      "type": "role",
+      "primary": true,
+      "lenses": [
+        "confucius",
+        "kant",
+        "epictetus",
+        "zhuangzi"
+      ]
+    },
+    {
+      "id": "unsure",
+      "label": "說不清楚，直接給我一個問題",
+      "type": null,
+      "primary": true,
+      "lenses": []
+    },
+    {
+      "id": "good_life",
+      "label": "時間、金錢、陪伴，不知道怎麼取捨",
+      "type": "good_life",
+      "primary": false,
+      "lenses": [
+        "aristotle",
+        "mill",
+        "confucius",
+        "zhuangzi"
+      ]
+    },
+    {
+      "id": "authenticity",
+      "label": "覺得自己在演某個樣子",
+      "type": "authenticity",
+      "primary": false,
+      "lenses": [
+        "aristotle",
+        "wang_yangming"
+      ]
+    }
   ]
 }

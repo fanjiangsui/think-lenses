@@ -275,3 +275,81 @@ label.btn:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; 
 @media (prefers-reduced-motion: reduce) {
   #toast { transition: none; }
 }
+
+/* —— 輕量模式：一次一張卡 —— */
+.row.big { padding: 1.2rem 0; }
+.row.big .t { font-size: 1.2rem; }
+
+.btn.block { display: block; width: 100%; min-height: 3.4rem; font-size: 1.1rem; }
+a.btn.block { line-height: 2; }
+.actions.center { justify-content: center; margin-top: 0.4rem; }
+
+.bigq { font: 600 1.55rem/1.75 var(--serif); letter-spacing: 0.02em; margin: 1rem 0 1.75rem; }
+.bigact { font: 600 1.15rem/1.7 var(--serif); margin: 0.4rem 0 0.8rem; }
+.angle { display: flex; align-items: center; gap: 0.5rem; color: var(--muted); margin: 0.75rem 0 0; }
+
+/* 看過的鏡頭一個一個疊上去，最新的那個顏色最濃：不需要進度條，也看得出走到哪 */
+.trail { display: flex; align-items: center; min-height: 2.6rem; margin: 1rem 0 0.25rem; }
+.trail .r {
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+  border: 2px solid var(--c);
+  background: color-mix(in srgb, var(--c) 8%, transparent);
+}
+.trail .r + .r { margin-left: -0.75rem; }
+.trail .r.now { background: color-mix(in srgb, var(--c) 30%, transparent); }
+
+details.fold { margin: 0.9rem 0; border-top: 1px solid var(--rule); padding-top: 0.25rem; }
+details.fold > summary { cursor: pointer; color: var(--muted); padding: 0.6rem 0; min-height: 2.75rem; }
+details.fold .rows { margin: 0.25rem 0 0; border-bottom: 0; }
+.credit { margin-top: 1.75rem; }
+.rows + details.fold { border-top: 0; }
+
+/* —— 刪除、整理、保護 —— */
+input[type="password"], input[type="text"] {
+  width: 100%;
+  font: inherit;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 0.4rem;
+  padding: 0.6rem 0.8rem;
+}
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.titlebar { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
+.managebar { display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin: 0.5rem 0; }
+.managebar .grow { flex: 1; }
+.pickrow { display: flex; gap: 0.8rem; align-items: flex-start; cursor: pointer; }
+.pickrow input { flex: none; margin-top: 0.55rem; width: 1.15rem; height: 1.15rem; accent-color: var(--accent); }
+.pickrow .body { flex: 1; min-width: 0; }
+
+#toast.has-action { pointer-events: auto; }
+.toast-btn {
+  margin-left: 0.9rem;
+  min-height: 2.75rem;
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* 切到背景時遮蔽：多工切換畫面不露出內容 */
+body.cover #app, body.cover #nav { visibility: hidden; }
+body.cover::after {
+  content: "思考鏡頭";
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--paper);
+  color: var(--muted);
+  font: 600 1.4rem var(--serif);
+}
+#lockMsg { min-height: 1.8rem; margin: 0.5rem 0; }

@@ -118,3 +118,57 @@ v1 沒有做 AI(B 層的 `overlay.json`、`ai_config.json` 留待 v2)，只實�
 | 備份檔 | 未定 | `{ app: "think-lenses", export_version: 1, exported_at, pack_version, sessions: [...] }` |
 
 合併規則：以 `id` 對應；本機沒有就新增；有就比較 `updated_at`，匯入者較新才覆蓋；其餘略過。
+
+## v2：輕量模式的資料變更(全部為新增欄位，舊紀錄與備份仍可匯入)
+
+### 內容包 `philosophers.json`(v0.3.0)
+
+| 欄位 | 位置 | 說明 |
+|---|---|---|
+| `angle` | 每面鏡頭 | 白話角度名，輕量模式用它取代哲學家名字 |
+| `micro_action_small` | 每面鏡頭 | 更小的小行動(「太大了，換小一點」) |
+| `quick_ok` | 每面鏡頭 | 是否可進輕量模式。自己寫了「低落或自責時不宜」的鏡頭必須為 `false`(內容檢查會強制) |
+| `quick_questions` | `quick_ok` 的鏡頭 | 輕量模式可用的題目索引(較溫和的問題) |
+| `entries[]` | 頂層 | 白話入口：`id`、`label`、`type`(可為 null＝說不清楚)、`primary`、`lenses`(依序的候選池)、`note`(第一張卡的溫和提醒，可省略) |
+
+### 紀錄(sessions)
+
+| 欄位 | 說明 |
+|---|---|
+| `mode` | `quick` 或 `deep`(舊紀錄沒有此欄，視為 deep) |
+| `entry` | 輕量入口 id |
+| `reactions[]` | 每張卡按了什麼：`{ lens, kind, question_index, reaction: next / switch / act }`。個人層 AI 之後可據此得知哪些角度對你有感 |
+| `action` | `{ lens, text, size: normal / small, status: pending / done / not_yet / not_fit, at, checked_at }` |
+| `answers[]` | 輕量模式的筆記同樣記在這裡(`kind: question`) |
+
+回訪規則：`action.status` 為 `pending`，且建立日期早於今天，下次打開首頁時詢問一次。
+
+## v2.1：資料保護
+
+### 加密備份檔格式
+
+```json
+{
+  "app": "think-lenses",
+  "export_version": 1,
+  "encrypted": true,
+  "kdf": { "name": "PBKDF2", "hash": "SHA-256", "iterations": 600000, "salt": "<base64>" },
+  "cipher": { "name": "AES-GCM", "iv": "<base64>" },
+  "ciphertext": "<base64>"
+}
+```
+
+- 明文是原本的備份 JSON(`{ app, export_version, exported_at, pack_version, sessions }`)，整包加密，因此看不到筆數與時間。
+- 金鑰由使用者輸入的密語經 PBKDF2 推導；密語不儲存。AES-GCM 的附加驗證資料固定為 `think-lenses|backup|v1`。
+- 匯入時，`kdf.iterations` 必須在 100,000 到 2,000,000 之間，否則視為格式錯誤(避免惡意檔拖垮裝置)。
+
+### 本機設定
+
+| 鍵 | 內容 |
+|---|---|
+| `tl.lock.v1` | App 鎖：`{ salt, iterations, hash, timeout, fails, until }`。只存 PIN 的加鹽雜湊。App 鎖是遮罩，不是加密 |
+| `tl.meta.v1` | 新增 `enc`(是否預設加密備份)、`cover`(是否背景遮蔽) |
+
+### 刪除
+
+刪除以墓碑表示：`{ id, created_at, updated_at, deleted_at }`，內容立即清空。復原會寫回完整內容，並把 `updated_at` 設為比墓碑更新的時間，才能蓋過已同步到另一台的刪除。
