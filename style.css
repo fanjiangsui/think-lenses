@@ -1,0 +1,277 @@
+/* 思考鏡頭 — 設計語彙:鏡頭(圓)。每位哲學家一個色相,兩面鏡頭疊出的交集,就是「碰撞」。 */
+
+:root {
+  --paper: #f2f4f3;
+  --surface: #fbfcfb;
+  --ink: #1c2428;
+  --muted: #5b686e;
+  --rule: #cdd5d7;
+  --accent: #2c5d6d;
+  --danger: #9b3b2e;
+  --c: #2c5d6d; /* 目前鏡頭色,由 app.js 依 data-lens 設定 */
+  --serif: "Noto Serif TC", "Source Han Serif TC", "Songti TC", "STSong", "PMingLiU", "MingLiU", serif;
+  --sans: -apple-system, BlinkMacSystemFont, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #12171a;
+    --surface: #1a2125;
+    --ink: #e4e9ea;
+    --muted: #9aa7ac;
+    --rule: #2c363a;
+    --accent: #8cc0cf;
+    --danger: #e0897b;
+  }
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 1.0625rem/1.85 var(--sans);
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+  overflow-wrap: anywhere;
+}
+
+#app {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 1.5rem max(1.25rem, env(safe-area-inset-right, 0px)) 3rem max(1.25rem, env(safe-area-inset-left, 0px));
+}
+
+h1 { font: 600 1.75rem/1.45 var(--serif); letter-spacing: 0.02em; margin: 0.5rem 0 0.5rem; }
+h2 { font: 600 1.3rem/1.5 var(--serif); margin: 2.25rem 0 0.5rem; }
+h3 { font: 600 1rem/1.6 var(--sans); color: var(--muted); margin: 1.75rem 0 0.25rem; }
+p { margin: 0.5rem 0; }
+ul, ol { margin: 0.4rem 0; padding-left: 1.3rem; }
+li { margin: 0.2rem 0; }
+
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.sub { color: var(--muted); }
+.small { font-size: 0.9rem; }
+
+/* —— 列表(不用卡片,用分隔線)—— */
+.rows { margin: 1.25rem 0; border-bottom: 1px solid var(--rule); }
+.row {
+  display: block;
+  padding: 1rem 0;
+  border-top: 1px solid var(--rule);
+  color: inherit;
+  text-decoration: none;
+}
+.row .t { display: block; font: 600 1.15rem/1.55 var(--serif); }
+.row .h { display: block; color: var(--muted); font-size: 0.95rem; }
+.row .name { display: flex; align-items: center; gap: 0.5rem; }
+.row .clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font: 600 1.05rem/1.6 var(--serif);
+}
+.meta { display: flex; flex-wrap: wrap; gap: 0 1rem; color: var(--muted); font-size: 0.9rem; margin-top: 0.15rem; }
+
+.dot { display: inline-block; flex: none; width: 0.7rem; height: 0.7rem; border-radius: 50%; background: var(--c); }
+
+.badge {
+  display: inline-block;
+  border: 1px solid var(--rule);
+  border-radius: 1rem;
+  padding: 0 0.6rem;
+  font-size: 0.8rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.badge.due { border-color: var(--accent); color: var(--accent); }
+
+.notice {
+  border-left: 4px solid var(--accent);
+  background: var(--surface);
+  padding: 0.4rem 1rem 0.6rem;
+  margin: 1.25rem 0;
+}
+.notice .row { padding: 0.5rem 0; border-top: 0; }
+.notice .row .clamp { font-size: 1rem; }
+
+/* —— 按鈕與表單 —— */
+.btn {
+  appearance: none;
+  display: inline-block;
+  border: 1px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  line-height: 1.4;
+  text-align: center;
+  text-decoration: none;
+  padding: 0.65rem 1.25rem;
+  min-height: 2.75rem;
+  border-radius: 0.4rem;
+  cursor: pointer;
+}
+.btn.primary { background: var(--ink); color: var(--paper); }
+.btn.text { border-color: transparent; color: var(--accent); text-decoration: underline; padding-left: 0.5rem; padding-right: 0.5rem; }
+.btn.danger { border-color: var(--danger); color: var(--danger); }
+.actions { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 1rem 0; }
+
+label.field { display: block; font-weight: 600; margin: 1.25rem 0 0.35rem; }
+
+textarea, input[type="date"], select {
+  width: 100%;
+  font: inherit;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 0.4rem;
+  padding: 0.6rem 0.8rem;
+}
+textarea { min-height: 3.6rem; resize: none; display: block; }
+input[type="date"] { width: auto; min-width: 11rem; }
+select { width: auto; max-width: 100%; }
+
+.q { margin: 1.1rem 0 0.2rem; }
+.qa { margin-bottom: 0.9rem; }
+
+.seg { display: flex; gap: 0.4rem; margin: 0.25rem 0; }
+.seg label { flex: 1; position: relative; }
+.seg input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.seg span {
+  display: block;
+  text-align: center;
+  border: 1px solid var(--rule);
+  border-radius: 0.4rem;
+  padding: 0.5rem 0;
+  background: var(--surface);
+}
+.seg input:checked + span { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.seg input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+.seg-hint { display: flex; justify-content: space-between; color: var(--muted); font-size: 0.85rem; }
+
+.check { display: flex; gap: 0.7rem; align-items: flex-start; padding: 0.7rem 0; border-top: 1px solid var(--rule); cursor: pointer; }
+.check input { margin-top: 0.55rem; width: 1.15rem; height: 1.15rem; flex: none; accent-color: var(--accent); }
+.check .t { font: 600 1.05rem/1.6 var(--serif); }
+.check .h { display: block; color: var(--muted); font-size: 0.9rem; line-height: 1.6; }
+.checks { border-bottom: 1px solid var(--rule); margin: 0.5rem 0; }
+
+/* —— 鏡頭(本設計唯一的強調處)—— */
+.venn { margin: 1.5rem 0 0.5rem; text-align: center; }
+.venn-rings { display: flex; justify-content: center; }
+.ring {
+  display: flex;
+  align-items: center;
+  width: 9.5rem;
+  height: 9.5rem;
+  border-radius: 50%;
+  border: 2px solid var(--c);
+  background: color-mix(in srgb, var(--c) 16%, transparent);
+  font: 600 0.9rem/1.3 var(--serif);
+}
+.ring + .ring { margin-left: -3.5rem; }
+.ring-a { justify-content: flex-start; padding-left: 1rem; }
+.ring-b { justify-content: flex-end; padding-right: 1rem; }
+.venn figcaption { margin-top: 0.75rem; color: var(--muted); font-size: 0.95rem; }
+
+.lens { border-left: 4px solid var(--c); padding-left: 1.1rem; margin: 1.5rem 0; }
+.lens > header h2 { margin: 0; }
+.lens .en { font: 400 0.9rem var(--sans); color: var(--muted); margin-left: 0.4rem; }
+.lens .tradition { color: var(--muted); font-size: 0.9rem; margin: 0; }
+.lens .oneliner { font: 600 1.15rem/1.7 var(--serif); margin: 0.9rem 0 0.4rem; }
+.lens .claim { margin: 0.4rem 0; }
+.lens .reading, .lens .foot { color: var(--muted); font-size: 0.9rem; }
+.caution { border: 1px dashed var(--c); border-radius: 0.4rem; padding: 0.1rem 1rem 0.8rem; margin: 1.5rem 0 1rem; }
+.caution h3:first-child { margin-top: 0.8rem; }
+
+.tabs {
+  display: flex;
+  gap: 0.25rem;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--rule);
+  margin: 1rem 0 0;
+  scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  flex: none;
+  appearance: none;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: none;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  color: var(--muted);
+  font: inherit;
+  padding: 0.6rem 0.8rem;
+  cursor: pointer;
+}
+.tab[aria-selected="true"] { color: var(--ink); font-weight: 600; border-bottom-color: var(--c); }
+
+.crumb { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; color: var(--muted); font-size: 0.9rem; }
+.crumb a { color: inherit; }
+.savestate { white-space: nowrap; }
+
+/* —— 底部導覽與提示 —— */
+nav.bottom {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  background: var(--surface);
+  border-top: 1px solid var(--rule);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  z-index: 10;
+}
+nav.bottom a {
+  position: relative;
+  flex: 1;
+  text-align: center;
+  padding: 0.8rem 0;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+nav.bottom a[aria-current="page"] { color: var(--ink); font-weight: 600; box-shadow: inset 0 3px 0 var(--accent); }
+nav.bottom .pip { display: inline-block; width: 0.5rem; height: 0.5rem; margin-left: 0.3rem; border-radius: 50%; background: var(--accent); vertical-align: middle; }
+
+#toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  max-width: min(32rem, calc(100vw - 2rem));
+  background: var(--ink);
+  color: var(--paper);
+  padding: 0.6rem 1rem;
+  border-radius: 0.4rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  z-index: 20;
+}
+#toast.show { opacity: 1; }
+
+.panel { margin: 1rem 0; padding: 0.25rem 0 0.75rem; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+.panel dl { margin: 0.5rem 0; display: grid; grid-template-columns: auto 1fr; gap: 0.15rem 1rem; }
+.panel dt { color: var(--muted); }
+.panel dd { margin: 0; }
+
+.hidden-input { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
+label.btn:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  #toast { transition: none; }
+}
